@@ -24,7 +24,8 @@ export class AuthService {
       throw new BadRequestException('Email already exists');
     }
     const hashedPassword = await this.hashPassword(password);
-    await this.prisma.user.create({
+    //1. create a user
+    const userOne = await this.prisma.user.create({
       data: {
         email,
         hashedPassword,
@@ -32,6 +33,7 @@ export class AuthService {
     });
 
     return { message: 'signup was successfull' };
+    //2. create a user with a profile
   }
 
   async signin(dto: AuthDto, req: Request, res: Response) {
@@ -56,7 +58,7 @@ export class AuthService {
       throw new ForbiddenException('Token not received');
     }
 
-    res.cookie('token1', token);
+    res.cookie('token', token);
     return res.send({ message: 'Logged in successfully' });
   }
 

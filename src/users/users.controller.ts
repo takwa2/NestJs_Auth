@@ -12,7 +12,7 @@ export class UsersController {
   getMyUser(@Param() params: { id: string }, @Req() req) {
     return this.usersService.getMyUser(params.id, req);
   }
-
+  @UseGuards(JwtAuthGuard)
   @Get()
   getUsers() {
     return this.usersService.getUsers();

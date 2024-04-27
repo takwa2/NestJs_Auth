@@ -11,7 +11,10 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async getMyUser(id: string, req: Request) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: { profile: true, posts: true, projects: true },
+    });
     const decodedUser = req.user as { id: string; email: string };
 
     if (!user) {
@@ -22,6 +25,7 @@ export class UsersService {
       throw new ForbiddenException('Access denied');
     }
     delete user.hashedPassword;
+
     return { user };
   }
 
