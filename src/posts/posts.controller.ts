@@ -18,7 +18,7 @@ export class PostsController {
     @Body() postData: { title: string; content: string; userIds: string[] },
   ) {
     const { title, content, userIds } = postData;
-    return this.postsService.createPost(title, content, userIds);
+    return this.postsService.createPostMultipleUsers(title, content, userIds);
   }
   @Get()
   findAllPosts() {

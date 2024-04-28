@@ -6,28 +6,24 @@ export class PostsService {
   constructor(private prisma: PrismaService) {}
 
   // n-m relationship Post-User
-  async createPost(title: string, content: string, userIds: string[]) {
-    const post = this.prisma.post.create({
+  async createPostMultipleUsers(title: string, content: string, userIds: string[]) {
+    const post = await this.prisma.post.create({
       data: {
-        title,
-        content,
-        //users: { connect: userIds.map((userId) => ({ id: userId })) },
-      },
-    });
+        title: title,
+        content: content,
+        postUsers: {
+          create: userIds.map(userId => ({
+            user: {
+              connect: {
+                id: userId
+              }
+            }
+          }))
+        }
+      }
+    })
     return { message: 'post succefully created ', post };
   }
-  /*
-  createPost(title: string, content: string, userIds: string[]) {
-    const Post = this.prisma.post.create({
-      data: {
-        title,
-        content,
-        users: { connect: userIds.map((userId) => ({ id: userId })) },
-      },
-    });
-    return { message: 'post succefully created ' };
-  }
-*/
   findAllPosts() {
     return this.prisma.post.findMany();
   }
