@@ -13,7 +13,7 @@ export class UsersService {
   async getMyUser(id: string, req: Request) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      include: { profile: true, posts: true, projects: true },
+      include: { posts: true, profile: true, projects: true },
     });
     const decodedUser = req.user as { id: string; email: string };
 

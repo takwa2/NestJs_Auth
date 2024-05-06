@@ -84,4 +84,5 @@ model PostUser {
   post Post @relation(fields: [postId],references: [id])
   @@id([userId,postId])
   
+
 }
