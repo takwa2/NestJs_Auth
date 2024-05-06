@@ -38,12 +38,9 @@ export class ProjectsController {
   updateProject(@Param('id') id: string, @Body() updateProjetDto: any) {
     return this.projectsService.updateProject(+id, updateProjetDto);
   }
-  @Delete(':userId/:projectId')
-  async removeProjectFromUser(
-    @Param('userId') userId: string,
-    @Param('projectId') projectId: string,
-  ) {
-    await this.projectsService.removeProjectFromUser(userId, projectId);
+  @Delete(':projectId')
+  async removeProject(@Param('projectId') projectId: string) {
+    await this.projectsService.removeProject(projectId);
   }
   /*
   @Delete(':id')

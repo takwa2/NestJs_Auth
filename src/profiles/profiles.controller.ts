@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Req,
+  Put,
 } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
 
@@ -34,8 +35,22 @@ export class ProfilesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProfileDto: any) {
-    return this.profilesService.update(id, updateProfileDto);
+  updateProfile(
+    @Param('id') id: string,
+    @Body() profileData: { firstName: string; lastName: string },
+  ) {
+    const { firstName, lastName } = profileData;
+    return this.profilesService.updateProfile(id, firstName, lastName);
+  }
+
+  @Put(':id')
+  updateProfileRelation(
+    @Param('id') id: string,
+    @Body()
+    updateprofileData: { userId: string; userEmail: string },
+  ) {
+    const { userId, userEmail } = updateprofileData;
+    return this.profilesService.updateProfileRelation(id, userId, userEmail);
   }
 
   @Delete(':id')

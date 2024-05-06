@@ -5,22 +5,21 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from 'prisma/prisma.service';
-import { profileDto } from './dto/profiles.dto';
-import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ProfilesService {
-  constructor(
-    private prisma: PrismaService,
-    private user: UsersService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async createProfile(firstName: string, lastName: string, userId: string) {
-    const profile = await this.prisma.profile.create({
+    await this.prisma.profile.create({
       data: {
         firstName,
         lastName,
-        user: { connect: { id: userId } },
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
       },
     });
     return {
@@ -60,8 +59,40 @@ export class ProfilesService {
     return { profile };
   }
 
-  update(id: string, updateProfileDto: any) {
-    return `This action updates a #${id} profile`;
+  async updateProfile(id: string, newfirstName: string, newlastName: string) {
+    const newProfile = await this.prisma.profile.update({
+      where: {
+        id,
+      },
+      data: {
+        firstName: newfirstName,
+        lastName: newlastName,
+      },
+    });
+    return {
+      message: 'The content of the Post "' + id + '" successfully updated',
+      newProfile,
+    };
+  }
+
+  async updateProfileRelation(
+    idp: string,
+    newUserId: string,
+    newUserEmail: string,
+  ) {
+    const updateProfile = await this.prisma.profile.update({
+      where: {
+        id: idp,
+      },
+      data: {
+        userId: newUserId,
+        userEmail: newUserEmail,
+      },
+    });
+    return {
+      message: 'the User of the Profile "' + idp + '" successfully updated',
+      updateProfile,
+    };
   }
 
   async deleteProfile(id: string) {

@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { connect } from 'http2';
 import { PrismaService } from 'prisma/prisma.service';
+import { disconnect } from 'process';
+import { PostsDto } from './dto/posts.dto';
 
 @Injectable()
 export class PostsService {
@@ -7,27 +10,36 @@ export class PostsService {
 
   // n-m relationship Post-User
   async createPost(title: string, content: string, userIds: string[]) {
-    const post = this.prisma.post.create({
+    const post = await this.prisma.post.create({
       data: {
         title,
         content,
-        //users: { connect: userIds.map((userId) => ({ id: userId })) },
+        users: {
+          create: userIds.map((userId) => ({
+            user: { connect: { id: userId } },
+          })),
+        },
       },
     });
     return { message: 'post succefully created ', post };
   }
+
   /*
-  createPost(title: string, content: string, userIds: string[]) {
-    const Post = this.prisma.post.create({
-      data: {
-        title,
-        content,
-        users: { connect: userIds.map((userId) => ({ id: userId })) },
-      },
+  async createPostForUsers(postData: PostsDto, userIds: string[]) {
+    const createPostPromises = userIds.map(async (userId) => {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          posts: {
+            create: postData
+          },
+        },
+      });
     });
-    return { message: 'post succefully created ' };
+    await Promise.all(createPostPromises);
   }
-*/
+  */
+
   findAllPosts() {
     return this.prisma.post.findMany();
   }
@@ -36,12 +48,64 @@ export class PostsService {
     return this.prisma.post.findUnique({ where: { id } });
   }
 
-  updatePost(id: number, updatePostDto: any) {
-    return `This action updates a #${id} post`;
+  async updatePost(postId: number, postTitle: string, postContent: string) {
+    const newPost = await this.prisma.post.update({
+      where: {
+        id: postId,
+      },
+      data: {
+        title: postTitle,
+        content: postContent,
+      },
+    });
+    return {
+      message: 'The content of the Post "' + postId + '" successfully updated',
+      newPost,
+    };
+  }
+  // delete certain users from a post and add others
+  async updatePostRelations(
+    idp: number,
+    oldUserId: string,
+    newUserIds: string[],
+  ) {
+    await this.prisma.postUser.deleteMany({
+      where: {
+        userId: oldUserId,
+        postId: idp,
+      },
+    });
+
+    await this.prisma.post.update({
+      where: {
+        id: idp,
+      },
+      data: {
+        users: {
+          create: newUserIds.map((userId) => ({
+            user: { connect: { id: userId } },
+          })),
+        },
+      },
+    });
+    return {
+      message: 'the relations of the Post "' + idp + '" successfully updated',
+    };
   }
 
-  removePost(id: number) {
-    const DeletedPost = this.prisma.post.delete({ where: { id } });
-    return { message: 'Post "' + id + '" successfully deleted' };
+  async deletePost(id: number) {
+    
+    const deletRecords = await this.prisma.postUser.deleteMany({
+      where: {
+        postId: id,
+
+      },
+    });
+    await this.prisma.post.delete({
+      where: {
+        id,
+      },
+    });
+    return { message: 'Post number "' + id + '" successfully deleted ' };
   }
 }

@@ -21,7 +21,7 @@ export class ProjectsService {
 
   findAllProjects() {
     return this.prisma.project.findMany({
-      select: { code: true, nom: true },
+      select: { code: true, nom: true, userId: true },
     });
   }
 
@@ -32,7 +32,7 @@ export class ProjectsService {
   updateProject(id: number, updateProjetDto: any) {
     return `This action updates a #${id} projet`;
   }
-
+  /*
   async removeProjectFromUser(userId: string, projectId: string) {
     await this.prisma.user.update({
       where: { id: userId },
@@ -46,11 +46,19 @@ export class ProjectsService {
       message:
         projectId + ' Project successfully deleted from ' + userId + ' list',
     };
+  }*/
+
+  async removeProject(projectId: string) {
+    const projectName = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { nom: true },
+    });
+
+    await this.prisma.project.delete({
+      where: {
+        id: projectId,
+      },
+    });
+    return { message: 'Project "' + projectName + '" successfully deleted' };
   }
-  /*
-  removeProject(id: string) {
-    const DeletedProject = this.prisma.project.delete({ where: { id } });
-    return { message: 'Project "' + id + '" successfully deleted' };
-  }
-  */
 }
